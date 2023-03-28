@@ -1,6 +1,6 @@
-# b2b-client
+# B2B Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+- [B2B Backend](https://github.com/bubbzDotDev/b2b-server)
 
 ## Recommended IDE Setup
 
