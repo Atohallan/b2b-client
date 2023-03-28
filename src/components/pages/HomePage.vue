@@ -47,5 +47,4 @@ h2 {
   margin: 0 auto;
   width: 350px;
 }
-
 </style>
