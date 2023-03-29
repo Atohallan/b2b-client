@@ -5,3 +5,24 @@ body {
 ::placeholder {
   color: #b9b5b5;
 }
+
+button {
+  cursor: pointer;
+}
+
+[theme="custom-dark"] {
+  background: #1c1e2d;
+  color: #d2cbcb;
+
+  ::placeholder {
+    color: #545050;
+  }
+
+  input {
+    background-color: #b9b5b5;
+  }
+
+  button {
+    color: #1c1e2d !important;
+  }
+}

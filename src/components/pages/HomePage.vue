@@ -23,7 +23,6 @@ async function generate() {
           type="text"
           name="userInput"
           label="Your input"
-          help="What interests you?"
           placeholder="Hey bots, what do you think about..."
           v-model="userInput"
         />
