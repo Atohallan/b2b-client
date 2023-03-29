@@ -1,6 +1,8 @@
+const SERVER_LOCATION = `${import.meta.env.VITE_SERVER_LOCATION}/api`;
+
 export const generateResponse = async (userInput: string) => {
     try {
-        const response = await fetch("http://localhost:3000/api/generate", {
+        const response = await fetch(`${SERVER_LOCATION}/generate`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

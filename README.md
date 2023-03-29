@@ -27,6 +27,15 @@ See [Vite Configuration Reference](https://vitejs.dev/config/).
 npm install
 ```
 
+### Add .env file
+- Create a file at the root of the project named `.env`
+- Add the following to the `.env` file
+- Locally, `VITE_SERVER_LOCATION` will be `http://localhost:3000`
+
+```bash
+VITE_SERVER_LOCATION=http://localhost:3000
+```
+
 ### Compile and Hot-Reload for Development
 
 ```sh
