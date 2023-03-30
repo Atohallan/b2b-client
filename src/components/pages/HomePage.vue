@@ -13,20 +13,29 @@ const botResponse2 = ref("")
 const userInput = ref("")
 const previousUserInput = ref("")
 let chatHistory = ""
+const chatHistoryMessageIsVisible = ref(false)
+let botResponseCount = 0
+let userResponseCount = 0
 
 enum InputOrigin {
   user,
   bot
 }
 
-function addToChatHistory(origin: InputOrigin, input: string, botResponseCount: number) {
+function addToChatHistory(origin: InputOrigin, input: string, responseCount: number) {
   if (InputOrigin.user) {
-    chatHistory = `Initial user input: ${input}.`
+    chatHistory = `User response #${responseCount}.Initial user input: ${input}.`
   }
 
   if (InputOrigin.bot) {
-    chatHistory += `Response #${botResponseCount}. Input from other bot: ${input}.`
+    chatHistory += `Bot response #${responseCount}. Input from other bot: ${input}.`
   }
+}
+
+function clearChatHistory() {
+  chatHistory = ""
+  botResponseCount = 0
+  chatHistoryMessageIsVisible.value = true
 }
 
 type FormSubmissionFields = {
@@ -34,16 +43,20 @@ type FormSubmissionFields = {
 }
 
 async function generate(fields: FormSubmissionFields) {
+  chatHistoryMessageIsVisible.value = false
   userInput.value = fields.userInput
-  addToChatHistory(InputOrigin.user, userInput.value, 0)
+  userResponseCount++
+  addToChatHistory(InputOrigin.user, userInput.value, userResponseCount)
   previousUserInput.value = ""
   botResponse.value = ""
   botResponse2.value = ""
   previousUserInput.value = userInput.value
   userInput.value = ""
   botResponse.value = await generateResponse(chatHistory)
-  addToChatHistory(InputOrigin.bot, botResponse.value, 1)
+  botResponseCount++
+  addToChatHistory(InputOrigin.bot, botResponse.value, botResponseCount)
   botResponse2.value = await generateResponse(chatHistory)
+  botResponseCount++
 }
 </script>
 
@@ -87,6 +100,12 @@ async function generate(fields: FormSubmissionFields) {
           validation-visibility="submit"
         />
       </FormKit>
+      <div class="clear-container">
+        <button v-if="chatHistory.length > 0" @click="clearChatHistory" type="button" class="clear-button">Clear Chat History</button>
+        <p v-if="chatHistoryMessageIsVisible">
+          Chat history has been cleared.
+        </p>
+      </div>
     </div>
 
   </div>
@@ -99,7 +118,8 @@ h2 {
 
 .form,
 .bot-response-container,
-.saved-user-input-container {
+.saved-user-input-container,
+.clear-container{
   margin: 0.5rem auto;
   width: 350px;
 }
@@ -126,5 +146,21 @@ hr {
   width: 350px;
   margin: 2rem auto;
   background-color: #000;
+}
+
+.clear-button {
+  border: none;
+  border-radius: 5px;
+  background-color: transparent;
+  color: #ff3131;
+  text-decoration: underline;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.clear-container {
+  text-align: center;
 }
 </style>
