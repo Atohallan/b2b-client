@@ -10,4 +10,8 @@ import TheHeader from "@/components/layout/TheHeader.vue"
   </div>
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+div {
+  padding-bottom: 0.5rem;
+}
+</style>
