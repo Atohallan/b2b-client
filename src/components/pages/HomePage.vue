@@ -23,18 +23,20 @@ enum InputOrigin {
 }
 
 function addToChatHistory(origin: InputOrigin, input: string, responseCount: number) {
-  if (InputOrigin.user) {
-    chatHistory = `User response #${responseCount}.Initial user input: ${input}.`
+  if (origin === InputOrigin.user) {
+    chatHistory += `User input (User response #${responseCount}): ${input}\nEnd of User response #${responseCount}.\n`
+    return
   }
 
-  if (InputOrigin.bot) {
-    chatHistory += `Bot response #${responseCount}. Input from other bot: ${input}.`
+  if (origin === InputOrigin.bot) {
+    chatHistory += `Input from a bot (Bot response #${responseCount}): ${input}\nEnd of Bot response #${responseCount}.\n`
   }
 }
 
 function clearChatHistory() {
   chatHistory = ""
   botResponseCount = 0
+  userResponseCount = 0
   chatHistoryMessageIsVisible.value = true
   previousUserInput.value = ""
   botResponse.value = ""
