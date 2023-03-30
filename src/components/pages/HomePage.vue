@@ -36,6 +36,9 @@ function clearChatHistory() {
   chatHistory = ""
   botResponseCount = 0
   chatHistoryMessageIsVisible.value = true
+  previousUserInput.value = ""
+  botResponse.value = ""
+  botResponse2.value = ""
 }
 
 type FormSubmissionFields = {
