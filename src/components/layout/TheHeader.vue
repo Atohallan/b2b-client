@@ -16,7 +16,7 @@ const toggleDark = useToggle(isDark);
         <font-awesome-icon :icon="isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon'" />
       </button>
     </div>
-    <img alt="Vue logo" class="logo" src="@/assets/images/logo.svg" width="125" height="125" />
+    <img alt="B2B logo" class="logo" src="@/assets/images/logo.svg" width="125" height="125" />
 
     <h1>Between 2 Bots</h1>
   </header>
