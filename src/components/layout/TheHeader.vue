@@ -12,7 +12,7 @@ const toggleDark = useToggle(isDark);
 <template>
   <header>
     <div class="mode">
-      <button @click="toggleDark()">
+      <button @click="toggleDark()" type="button" role="button" aria-label="Mode Toggle">
         <font-awesome-icon :icon="isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon'" />
       </button>
     </div>
