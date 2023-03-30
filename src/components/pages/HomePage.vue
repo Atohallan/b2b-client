@@ -73,6 +73,7 @@ async function generate(fields: FormSubmissionFields) {
     </div>
 
     <div v-if="botResponse.length > 0" class="bot-response-container">
+      <img alt="Bot 1" class="bot-image" src="@/assets/images/bot-1.svg" width="75" height="75" />
       <span class="bot-response-label">Bot 1:</span>
       <div class="bot-response">
         {{ botResponse }}
@@ -80,6 +81,7 @@ async function generate(fields: FormSubmissionFields) {
     </div>
 
     <div v-if="botResponse2.length > 0" class="bot-response-container">
+      <img alt="Bot 1" class="bot-image" src="@/assets/images/bot-2.svg" width="75" height="75" />
       <span class="bot-response-label">Bot 2:</span>
       <div class="bot-response">
         {{ botResponse2 }}
@@ -162,5 +164,10 @@ hr {
 
 .clear-container {
   text-align: center;
+}
+
+.bot-image {
+  display: block;
+  margin: 1rem auto auto;
 }
 </style>
