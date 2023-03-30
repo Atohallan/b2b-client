@@ -24,11 +24,11 @@ enum InputOrigin {
 
 function addToChatHistory(origin: InputOrigin, input: string, responseCount: number) {
   if (InputOrigin.user) {
-    chatHistory = `User response #${responseCount}.Initial user input: ${input}.`
+    chatHistory += `User response #${responseCount}.User input: ${input}.`
   }
 
   if (InputOrigin.bot) {
-    chatHistory += `Bot response #${responseCount}. Input from other bot: ${input}.`
+    chatHistory += `Bot response #${responseCount}. Input from a bot: ${input}.`
   }
 }
 
