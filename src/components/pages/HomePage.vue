@@ -84,7 +84,7 @@ async function generate(fields: FormSubmissionFields) {
     </div>
 
     <div v-if="botResponse2.length > 0" class="bot-response-container">
-      <img alt="Bot 1" class="bot-image" src="@/assets/images/bot-2.svg" width="75" height="75" />
+      <img alt="Bot 2" class="bot-image" src="@/assets/images/bot-2.svg" width="75" height="75" />
       <span class="bot-response-label">Bot 2:</span>
       <div class="bot-response">
         {{ botResponse2 }}
@@ -105,12 +105,13 @@ async function generate(fields: FormSubmissionFields) {
           validation-visibility="submit"
         />
       </FormKit>
-      <div class="clear-container">
-        <button v-if="chatHistory.length > 0" @click="clearChatHistory" type="button" class="clear-button">Clear Chat History</button>
-        <p v-if="chatHistoryMessageIsVisible">
-          Chat history has been cleared.
-        </p>
-      </div>
+    </div>
+
+    <div class="clear-container">
+      <button v-if="chatHistory.length > 0" @click="clearChatHistory" type="button" class="clear-button">Clear Chat History</button>
+      <p v-if="chatHistoryMessageIsVisible">
+        Chat history has been cleared.
+      </p>
     </div>
 
   </div>
@@ -124,7 +125,7 @@ h2 {
 .form,
 .bot-response-container,
 .saved-user-input-container,
-.clear-container{
+.clear-container {
   margin: 0.5rem auto;
   width: 350px;
 }
