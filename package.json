@@ -15,6 +15,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@formkit/auto-animate": "^1.0.0-beta.6",
     "@formkit/themes": "^0.16.4",
     "@formkit/vue": "^0.16.4",
     "@fortawesome/fontawesome-svg-core": "^6.4.0",

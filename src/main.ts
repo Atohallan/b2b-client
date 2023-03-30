@@ -1,7 +1,9 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+
 import { plugin, defaultConfig } from '@formkit/vue'
 import '@formkit/themes/genesis'
+import { autoAnimatePlugin } from '@formkit/auto-animate/vue'
 
 import App from './App.vue'
 import router from './router'
@@ -16,7 +18,7 @@ library.add(faMoon, faSun)
 
 const app = createApp(App)
 app.component('font-awesome-icon', FontAwesomeIcon)
-
+app.use(autoAnimatePlugin)
 app.use(createPinia())
 app.use(router)
 app.use(plugin, defaultConfig)

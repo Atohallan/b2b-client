@@ -1,0 +1,22 @@
+[theme="custom-dark"] {
+  background: #1c1e2d;
+  color: #d2cbcb;
+
+  ::placeholder {
+    color: #545050;
+  }
+
+  input {
+    background-color: #b9b5b5 !important;
+  }
+
+  button.formkit-input {
+    background-color: #ff3131 !important;
+    color: #fff !important;
+  }
+
+  hr {
+    background-color: #d2cbcb;
+  }
+
+}
