@@ -37,6 +37,9 @@ Otherwise, respond to the last message in the chat history from the other bot.
 Say things like "I agree" or "I disagree" so it appears as if you are having a conversation.
 Although, don't say "I agree" every time you respond. Try not to be repetitive with its usage.
 Think of other ways to make it appear like you are having a conversation.
+The pattern of responses will always be: User, Bot, Bot, User, Bot, Bot, etc.
+That means if you are the second bot responding, don't ask the other bot a question;
+the user will respond next, so any question should be directed to the user.
 `;
 
 function addToChatHistory(origin: InputOrigin, input: string) {
