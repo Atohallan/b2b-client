@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { generateResponse } from '@/api/request'
+import { generateResponse, moderate } from '@/api/request'
 import autoAnimate from "@formkit/auto-animate";
 
 const form = ref()
@@ -12,31 +12,48 @@ const botResponse = ref("")
 const botResponse2 = ref("")
 const userInput = ref("")
 const previousUserInput = ref("")
-let chatHistory = ""
 const chatHistoryMessageIsVisible = ref(false)
-let botResponseCount = 0
-let userResponseCount = 0
+const flagged = ref(false)
+
+type MessageObject = {
+  role: string;
+  content: string;
+}
+let chatHistory: MessageObject[] = []
 
 enum InputOrigin {
   user,
   bot
 }
 
-function addToChatHistory(origin: InputOrigin, input: string, responseCount: number) {
+const instructions = `
+You are a friendly, helpful assistant.
+A user has asked a question or asked for some sort of explanation.
+You are also having a conversation with another chat bot, discussing what the user has requested.
+You will expand upon things the other chat bot says to help the user with their question.
+You can disagree, agree, and/or add alternatives if you wish.
+If the last message was from the user, then answer it normally.
+Otherwise, respond to the last message in the chat history from the other bot.
+Say things like "I agree" or "I disagree" so it appears as if you are having a conversation.
+Although, don't say "I agree" every time you respond. Try not to be repetitive with its usage.
+Think of other ways to make it appear like you are having a conversation.
+Do not label or reveal your response number. It may be confusing for the user.
+Do not respond with "Input from a bot" either.
+`;
+
+function addToChatHistory(origin: InputOrigin, input: string) {
   if (origin === InputOrigin.user) {
-    chatHistory += `User input (User response #${responseCount}): ${input}\nEnd of User response #${responseCount}.\n`
+    chatHistory.push({ role: "user", content: input })
     return
   }
 
   if (origin === InputOrigin.bot) {
-    chatHistory += `Input from a bot (Bot response #${responseCount}): ${input}\nEnd of Bot response #${responseCount}.\n`
+    chatHistory.push({ role: "assistant", content: input })
   }
 }
 
 function clearChatHistory() {
-  chatHistory = ""
-  botResponseCount = 0
-  userResponseCount = 0
+  chatHistory = []
   chatHistoryMessageIsVisible.value = true
   previousUserInput.value = ""
   botResponse.value = ""
@@ -49,19 +66,31 @@ type FormSubmissionFields = {
 
 async function generate(fields: FormSubmissionFields) {
   chatHistoryMessageIsVisible.value = false
+  flagged.value = false
   userInput.value = fields.userInput
-  userResponseCount++
-  addToChatHistory(InputOrigin.user, userInput.value, userResponseCount)
+  flagged.value = await moderate(userInput.value)
   previousUserInput.value = ""
   botResponse.value = ""
   botResponse2.value = ""
   previousUserInput.value = userInput.value
+  if (flagged.value === true) {
+    userInput.value = ""
+    return
+  }
+  addToChatHistory(InputOrigin.user, userInput.value)
   userInput.value = ""
-  botResponse.value = await generateResponse(chatHistory)
-  botResponseCount++
-  addToChatHistory(InputOrigin.bot, botResponse.value, botResponseCount)
-  botResponse2.value = await generateResponse(chatHistory)
-  botResponseCount++
+  let messages = [
+    { role: 'system', content: instructions },
+    ...chatHistory,
+  ]
+  botResponse.value = await generateResponse(messages)
+  addToChatHistory(InputOrigin.bot, botResponse.value)
+  messages = [
+    { role: 'system', content: instructions },
+    ...chatHistory,
+  ]
+  botResponse2.value = await generateResponse(messages)
+  addToChatHistory(InputOrigin.bot, botResponse2.value)
 }
 </script>
 
@@ -116,6 +145,12 @@ async function generate(fields: FormSubmissionFields) {
       </p>
     </div>
 
+    <div v-if="flagged" class="flagged-container">
+      <p>
+        Your input violated OpenAI's <a href="https://openai.com/policies/usage-policies" target="_blank" rel="noopener">usage policies</a>.
+      </p>
+    </div>
+
   </div>
 </template>
 
@@ -127,7 +162,8 @@ h2 {
 .form,
 .bot-response-container,
 .saved-user-input-container,
-.clear-container {
+.clear-container,
+.flagged-container {
   margin: 0.5rem auto;
   width: 350px;
 }
@@ -175,5 +211,20 @@ hr {
 .bot-image {
   display: block;
   margin: 1rem auto auto;
+}
+
+.flagged-container {
+  p,
+  a {
+    color: #ff3131;
+  }
+
+  a {
+    font-weight: bold;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
 }
 </style>
