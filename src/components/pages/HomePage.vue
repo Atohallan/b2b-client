@@ -37,8 +37,6 @@ Otherwise, respond to the last message in the chat history from the other bot.
 Say things like "I agree" or "I disagree" so it appears as if you are having a conversation.
 Although, don't say "I agree" every time you respond. Try not to be repetitive with its usage.
 Think of other ways to make it appear like you are having a conversation.
-Do not label or reveal your response number. It may be confusing for the user.
-Do not respond with "Input from a bot" either.
 `;
 
 function addToChatHistory(origin: InputOrigin, input: string) {
