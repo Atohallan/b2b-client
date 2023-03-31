@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { generateResponse, moderate } from '@/api/request'
-import autoAnimate from "@formkit/auto-animate";
+import autoAnimate from '@formkit/auto-animate';
 
 const form = ref()
 onMounted(() => {

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { useDark, useToggle } from "@vueuse/core";
+import { useDark, useToggle } from '@vueuse/core'
+import GithubButton from 'vue-github-button'
 
 const isDark = useDark({
   selector: "body",
@@ -11,7 +12,8 @@ const toggleDark = useToggle(isDark);
 
 <template>
   <header>
-    <div class="mode">
+    <div class="top-btn-container">
+      <github-button href="https://github.com/bubbzDotDev/b2b-client">Code</github-button>
       <button @click="toggleDark()" type="button" role="button" aria-label="Mode Toggle">
         <font-awesome-icon :icon="isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon'" />
       </button>
@@ -35,10 +37,10 @@ header {
   border-radius: 25px;
 }
 
-.mode {
+.top-btn-container {
   margin-bottom: 1rem;
   width: 100%;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 </style>

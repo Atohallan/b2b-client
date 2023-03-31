@@ -2,6 +2,10 @@
 
 - [B2B Backend](https://github.com/bubbzDotDev/b2b-server)
 
+## Description
+
+Frontend for an app with a goal to have different language models chat with each other.
+
 ## Recommended IDE Setup
 
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
