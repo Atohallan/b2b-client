@@ -1,8 +1,8 @@
-const SERVER_LOCATION = `${import.meta.env.VITE_SERVER_LOCATION}/api`
+const CONTROLLER_PATH = `${import.meta.env.VITE_SERVER_LOCATION}/api/open-ai`
 
 export const generateResponse = async (messages: object[]) => {
     try {
-        const response = await fetch(`${SERVER_LOCATION}/generate`, {
+        const response = await fetch(`${CONTROLLER_PATH}/generate`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -19,7 +19,7 @@ export const generateResponse = async (messages: object[]) => {
 
 export const moderate = async (input: string) => {
     try {
-        const response = await fetch(`${SERVER_LOCATION}/moderate`, {
+        const response = await fetch(`${CONTROLLER_PATH}/moderate`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
