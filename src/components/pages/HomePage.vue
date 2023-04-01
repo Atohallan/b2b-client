@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { generateResponse, moderate } from '@/api/open-ai'
+import { generateOpenAIResponse, moderate } from '@/api/open-ai'
 import autoAnimate from '@formkit/auto-animate';
 
 const form = ref()
@@ -14,6 +14,11 @@ const userInput = ref("")
 const previousUserInput = ref("")
 const chatHistoryMessageIsVisible = ref(false)
 const flagged = ref(false)
+
+const modelCompanyOptions = [
+  { label: 'OpenAI', value: 'openai' },
+  { label: 'AI21 Studio', value: 'ai21' }
+]
 
 type MessageObject = {
   role: string;
@@ -84,13 +89,13 @@ async function generate(fields: FormSubmissionFields) {
     { role: 'system', content: instructions },
     ...chatHistory,
   ]
-  botResponse.value = await generateResponse(messages)
+  botResponse.value = await generateOpenAIResponse(messages)
   addToChatHistory(InputOrigin.bot, botResponse.value)
   messages = [
     { role: 'system', content: instructions },
     ...chatHistory,
   ]
-  botResponse2.value = await generateResponse(messages)
+  botResponse2.value = await generateOpenAIResponse(messages)
   addToChatHistory(InputOrigin.bot, botResponse2.value)
 }
 </script>
@@ -127,6 +132,24 @@ async function generate(fields: FormSubmissionFields) {
 
     <div class="form" ref="form">
       <FormKit type="form" @submit="generate" submit-label="Discuss">
+        <FormKit
+          type="dropdown"
+          name="bot1Company"
+          label="Bot 1"
+          placeholder="Select company for language model"
+          :options="modelCompanyOptions"
+        >
+        </FormKit>
+
+        <FormKit
+          type="dropdown"
+          name="bot2Company"
+          label="Bot 2"
+          placeholder="Select company for language model"
+          :options="modelCompanyOptions"
+        >
+        </FormKit>
+
         <FormKit
           type="text"
           name="userInput"

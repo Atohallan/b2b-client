@@ -1,6 +1,6 @@
 const CONTROLLER_PATH = `${import.meta.env.VITE_SERVER_LOCATION}/api/open-ai`
 
-export const generateResponse = async (messages: object[]) => {
+export const generateOpenAIResponse = async (messages: object[]) => {
     try {
         const response = await fetch(`${CONTROLLER_PATH}/generate`, {
             method: "POST",
