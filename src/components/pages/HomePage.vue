@@ -136,19 +136,17 @@ async function generate(fields: FormSubmissionFields) {
           type="dropdown"
           name="bot1Company"
           label="Bot 1"
-          placeholder="Select company for language model"
+          placeholder="Select company"
           :options="modelCompanyOptions"
-        >
-        </FormKit>
+        />
 
         <FormKit
           type="dropdown"
           name="bot2Company"
           label="Bot 2"
-          placeholder="Select company for language model"
+          placeholder="Select company"
           :options="modelCompanyOptions"
-        >
-        </FormKit>
+        />
 
         <FormKit
           type="text"

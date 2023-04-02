@@ -1,5 +1,6 @@
-::placeholder {
-  color: #b9b5b5;
+::placeholder,
+.formkit-placeholder {
+  color: #b9b5b5 !important;
 }
 
 button {
@@ -14,3 +15,14 @@ button.formkit-input {
 .formkit-actions .formkit-wrapper {
   text-align: center;
 }
+
+.formkit-listitem[aria-selected=true],
+.formkit-listitem[data-is-active=true] {
+  background-color: #ff3131;
+  color: #1c1e2d;
+}
+
+.formkit-selected-icon {
+  color: #1c1e2d !important;
+}
+
