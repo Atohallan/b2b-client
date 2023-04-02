@@ -1,19 +1,22 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { generateOpenAIResponse, moderate } from '@/api/open-ai'
-import autoAnimate from '@formkit/auto-animate';
+import { ref, onMounted } from "vue"
+import { generateOpenAIResponse, moderate } from "@/api/open-ai"
+import { generateAI21Response } from "@/api/ai21"
+import autoAnimate from "@formkit/auto-animate";
 
 const form = ref()
 onMounted(() => {
   form.value.querySelectorAll(".formkit-outer").forEach(autoAnimate)
 })
 
-const botResponse = ref("")
-const botResponse2 = ref("")
+const bot1Response = ref("")
+const bot2Response = ref("")
 const userInput = ref("")
 const previousUserInput = ref("")
 const chatHistoryMessageIsVisible = ref(false)
 const flagged = ref(false)
+const bot1Company = ref("")
+const bot2Company = ref("")
 
 const modelCompanyOptions = [
   { label: 'OpenAI', value: 'openai' },
@@ -62,22 +65,26 @@ function clearChatHistory() {
   chatHistory = []
   chatHistoryMessageIsVisible.value = true
   previousUserInput.value = ""
-  botResponse.value = ""
-  botResponse2.value = ""
+  bot1Response.value = ""
+  bot2Response.value = ""
 }
 
 type FormSubmissionFields = {
   userInput: string;
+  bot1Company: string;
+  bot2Company: string
 }
 
 async function generate(fields: FormSubmissionFields) {
   chatHistoryMessageIsVisible.value = false
   flagged.value = false
   userInput.value = fields.userInput
+  bot1Company.value = fields.bot1Company
+  bot2Company.value = fields.bot2Company
   flagged.value = await moderate(userInput.value)
   previousUserInput.value = ""
-  botResponse.value = ""
-  botResponse2.value = ""
+  bot1Response.value = ""
+  bot2Response.value = ""
   previousUserInput.value = userInput.value
   if (flagged.value === true) {
     userInput.value = ""
@@ -89,14 +96,24 @@ async function generate(fields: FormSubmissionFields) {
     { role: 'system', content: instructions },
     ...chatHistory,
   ]
-  botResponse.value = await generateOpenAIResponse(messages)
-  addToChatHistory(InputOrigin.bot, botResponse.value)
+  if (bot1Company.value === "openai") {
+    bot1Response.value = await generateOpenAIResponse(messages)
+  }
+  if (bot1Company.value === 'ai21') {
+    bot1Response.value = await generateAI21Response(messages)
+  }
+  addToChatHistory(InputOrigin.bot, bot1Response.value)
   messages = [
     { role: 'system', content: instructions },
     ...chatHistory,
   ]
-  botResponse2.value = await generateOpenAIResponse(messages)
-  addToChatHistory(InputOrigin.bot, botResponse2.value)
+  if (bot2Company.value === "openai") {
+    bot2Response.value = await generateOpenAIResponse(messages)
+  }
+  if (bot2Company.value === 'ai21') {
+    bot2Response.value = await generateAI21Response(messages)
+  }
+  addToChatHistory(InputOrigin.bot, bot2Response.value)
 }
 </script>
 
@@ -112,23 +129,23 @@ async function generate(fields: FormSubmissionFields) {
       </p>
     </div>
 
-    <div v-if="botResponse.length > 0" class="bot-response-container">
+    <div v-if="bot1Response.length > 0" class="bot-response-container">
       <img alt="Bot 1" class="bot-image" src="@/assets/images/bot-1.svg" width="75" height="75" />
       <span class="bot-response-label">Bot 1:</span>
       <div class="bot-response">
-        {{ botResponse }}
+        {{ bot1Response }}
       </div>
     </div>
 
-    <div v-if="botResponse2.length > 0" class="bot-response-container">
+    <div v-if="bot2Response.length > 0" class="bot-response-container">
       <img alt="Bot 2" class="bot-image" src="@/assets/images/bot-2.svg" width="75" height="75" />
       <span class="bot-response-label">Bot 2:</span>
       <div class="bot-response">
-        {{ botResponse2 }}
+        {{ bot2Response }}
       </div>
     </div>
 
-    <hr v-if="botResponse.length > 0">
+    <hr v-if="bot1Response.length > 0">
 
     <div class="form" ref="form">
       <FormKit type="form" @submit="generate" submit-label="Discuss">

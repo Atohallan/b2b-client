@@ -10,7 +10,7 @@ export const generateAI21Response = async (messages: object[]) => {
       body: JSON.stringify({ input: messages }),
     })
     const data = await response.json()
-
+    console.log('The data:', data)
     return data.completions[0].data.text;
   } catch(error) {
     console.error(error)
