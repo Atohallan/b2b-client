@@ -1,15 +1,18 @@
+import axios from 'axios';
+
 const CONTROLLER_PATH = `${import.meta.env.VITE_SERVER_LOCATION}/api/open-ai`
 
 export const generateOpenAIResponse = async (messages: object[]) => {
     try {
-        const response = await fetch(`${CONTROLLER_PATH}/generate`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
+        const { data } = await axios.post(`${CONTROLLER_PATH}/generate`,
+          {
+              input: messages,
             },
-            body: JSON.stringify({ input: messages }),
-        })
-        const data = await response.json()
+          {
+              headers: {
+                  "Content-Type": "application/json",
+              },
+          })
 
         return data.choices[0].message.content
     } catch(error) {
@@ -19,14 +22,15 @@ export const generateOpenAIResponse = async (messages: object[]) => {
 
 export const moderate = async (input: string) => {
     try {
-        const response = await fetch(`${CONTROLLER_PATH}/moderate`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
+        const { data } = await axios.post(`${CONTROLLER_PATH}/moderate`,
+          {
+            input
             },
-            body: JSON.stringify({ input }),
-        })
-        const data = await response.json()
+          {
+              headers: {
+                  "Content-Type": "application/json",
+              },
+          })
 
         return data.results[0].flagged
     } catch(error) {

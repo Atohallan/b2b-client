@@ -1,15 +1,18 @@
+import axios from 'axios';
+
 const CONTROLLER_PATH = `${import.meta.env.VITE_SERVER_LOCATION}/api/ai21`
 
 export const generateAI21Response = async (messages: object[]) => {
   try {
-    const response = await fetch(`${CONTROLLER_PATH}/generate`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const { data } = await axios.post(`${CONTROLLER_PATH}/generate`,
+      {
+        input: messages,
       },
-      body: JSON.stringify({ input: messages }),
-    })
-    const data = await response.json()
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
     console.log('The data:', data)
     return data.completions[0].data.text;
   } catch(error) {

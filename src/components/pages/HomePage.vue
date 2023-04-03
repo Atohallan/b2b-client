@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed, watch } from "vue"
 import { generateOpenAIResponse, moderate } from "@/api/open-ai"
 import { generateAI21Response } from "@/api/ai21"
 import autoAnimate from "@formkit/auto-animate";
@@ -17,6 +17,7 @@ const chatHistoryMessageIsVisible = ref(false)
 const flagged = ref(false)
 const bot1Company = ref("")
 const bot2Company = ref("")
+const disableDropdowns = ref(false)
 
 const modelCompanyOptions = [
   { label: 'OpenAI', value: 'openai' },
@@ -115,6 +116,14 @@ async function generate(fields: FormSubmissionFields) {
   }
   addToChatHistory(InputOrigin.bot, bot2Response.value)
 }
+
+const chatHasHistory = computed(() => {
+  return chatHistory.length > 0
+})
+
+watch(chatHasHistory, (newVal) => {
+  disableDropdowns.value = newVal
+})
 </script>
 
 <template>
@@ -122,14 +131,14 @@ async function generate(fields: FormSubmissionFields) {
 
     <h2>Let's Discuss</h2>
 
-    <div v-if="previousUserInput.length > 0" class="saved-user-input-container">
+    <div v-if="previousUserInput" class="saved-user-input-container">
       <span>You:</span>
       <p class="saved-user-input">
         {{ previousUserInput }}
       </p>
     </div>
 
-    <div v-if="bot1Response.length > 0" class="bot-response-container">
+    <div v-if="bot1Response" class="bot-response-container">
       <img alt="Bot 1" class="bot-image" src="@/assets/images/bot-1.svg" width="75" height="75" />
       <span class="bot-response-label">Bot 1:</span>
       <div class="bot-response">
@@ -137,7 +146,7 @@ async function generate(fields: FormSubmissionFields) {
       </div>
     </div>
 
-    <div v-if="bot2Response.length > 0" class="bot-response-container">
+    <div v-if="bot2Response" class="bot-response-container">
       <img alt="Bot 2" class="bot-image" src="@/assets/images/bot-2.svg" width="75" height="75" />
       <span class="bot-response-label">Bot 2:</span>
       <div class="bot-response">
@@ -145,7 +154,7 @@ async function generate(fields: FormSubmissionFields) {
       </div>
     </div>
 
-    <hr v-if="bot1Response.length > 0">
+    <hr v-if="bot1Response">
 
     <div class="form" ref="form">
       <FormKit type="form" @submit="generate" submit-label="Discuss">
@@ -155,6 +164,7 @@ async function generate(fields: FormSubmissionFields) {
           label="Bot 1"
           placeholder="Select company"
           :options="modelCompanyOptions"
+          :disabled="disableDropdowns"
         />
 
         <FormKit
@@ -163,6 +173,7 @@ async function generate(fields: FormSubmissionFields) {
           label="Bot 2"
           placeholder="Select company"
           :options="modelCompanyOptions"
+          :disabled="disableDropdowns"
         />
 
         <FormKit
