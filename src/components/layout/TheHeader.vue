@@ -13,7 +13,7 @@ const toggleDark = useToggle(isDark);
   <header>
     <div class="top-btn-container">
       <button @click="toggleDark()" type="button" role="button" aria-label="Mode Toggle">
-        <font-awesome-icon :icon="isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon'" />
+        <font-awesome-icon :icon="isDark ? 'fa-solid fa-moon' : 'fa-solid fa-sun'" />
       </button>
     </div>
     <img alt="B2B logo" class="logo" src="@/assets/images/logo.svg" width="125" height="125" />
