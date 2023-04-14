@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, Ref } from "vue";
+import { onMounted, ref } from "vue";
 import { generateOpenAIResponse, moderate } from "@/api/open-ai";
 import { generateAI21Response } from "@/api/ai21";
 import autoAnimate from "@formkit/auto-animate";
@@ -13,8 +13,8 @@ onMounted(() => {
   form.value.querySelectorAll(".formkit-outer").forEach(autoAnimate)
 })
 
-const bot1Responses = ref([]) as Ref<string[]>
-const bot2Responses = ref([]) as Ref<string[]>
+const bot1Responses = ref([] as Array<string>)
+const bot2Responses = ref([] as Array<string>)
 const userInput = ref("")
 const previousUserInput = ref("")
 const chatHistoryMessageIsVisible = ref(false)
