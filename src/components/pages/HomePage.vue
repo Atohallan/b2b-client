@@ -1,97 +1,207 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { generateResponse, moderate } from '@/api/open-ai'
-import autoAnimate from '@formkit/auto-animate';
+import { onMounted, ref, Ref } from "vue";
+import { generateOpenAIResponse, moderate } from "@/api/open-ai";
+import { generateAI21Response } from "@/api/ai21";
+import autoAnimate from "@formkit/auto-animate";
+import { InputDestination, InputOrigin } from "@/enums/input";
+import { ConversationLength } from "@/enums/form";
+import { FormSubmissionFields } from "@/types/form";
+import { MessageObjectOpenAI } from "@/types/message";
 
 const form = ref()
 onMounted(() => {
   form.value.querySelectorAll(".formkit-outer").forEach(autoAnimate)
 })
 
-const botResponse = ref("")
-const botResponse2 = ref("")
+const bot1Responses = ref([]) as Ref<string[]>
+const bot2Responses = ref([]) as Ref<string[]>
 const userInput = ref("")
 const previousUserInput = ref("")
 const chatHistoryMessageIsVisible = ref(false)
 const flagged = ref(false)
+const bot1Destination = ref("")
+const bot2Destination = ref("")
+const disableDropdowns = ref(false)
 
-type MessageObject = {
-  role: string;
-  content: string;
-}
-let chatHistory: MessageObject[] = []
+const modelDestinationOptions = [
+  { label: 'OpenAI: GPT 3.5 Turbo', value: InputDestination.OPENAI },
+  { label: 'AI21 Studio: J2 Jumbo Instruct', value: InputDestination.AI21 },
+]
 
-enum InputOrigin {
-  user,
-  bot
-}
+const conversationTurnOptions = [
+  { label: 'S: 2 bot responses per turn', value: ConversationLength.SHORT },
+  { label: 'M: 4 bot responses per turn', value: ConversationLength.MEDIUM },
+  { label: 'L: 6 bot responses per turn', value: ConversationLength.LONG },
+]
 
-const instructions = `
-You are a friendly, helpful assistant.
-A user has asked a question or asked for some sort of explanation.
-You are also having a conversation with another chat bot, discussing what the user has requested.
-You will expand upon things the other chat bot says to help the user with their question.
-You can disagree, agree, and/or add alternatives if you wish.
-If the last message was from the user, then answer it normally.
-Otherwise, respond to the last message in the chat history from the other bot.
-Say things like "I agree" or "I disagree" so it appears as if you are having a conversation.
-Although, don't say "I agree" every time you respond. Try not to be repetitive with its usage.
-Think of other ways to make it appear like you are having a conversation.
-The pattern of responses will always be: User, Bot, Bot, User, Bot, Bot, etc.
-That means if you are the second bot responding, don't ask the other bot a question;
-the user will respond next, so any question should be directed to the user.
-`;
+let chatHistoryOpenAI: MessageObjectOpenAI[] = []
+let chatHistoryWithInstructionsOpenAI: MessageObjectOpenAI[] = []
+
+const instructionsOpenAI = 'You are a friendly, helpful assistant. '
+  + 'You are having a conversation with another chat bot, discussing what the user has requested. '
+  + 'There are only two bots in the conversation. '
+  + 'Never identify yourself as "User:" in your response. '
+  + 'You will expand upon things the other chat bot says to help the user with their question. '
+  + 'You can disagree, agree, and/or add alternatives if you wish. '
+  + 'Say things like "I agree" or "I disagree" so it appears as if you are having a conversation. '
+  + 'Think of other ways to make it appear like you are having a conversation.'
+
+let chatHistoryWithInstructionsAI21 = 'You are a friendly, helpful assistant. '
+  + 'You are having a conversation with another chat bot, discussing what the user has requested. '
+  + 'There are only two bots in the conversation. '
+  + 'Never identify yourself as "User:" in your response. '
+  + 'You will expand upon things the other chat bot says to help the user with their question. '
+  + 'You can disagree, agree, and/or add alternatives if you wish. '
+  + 'Say things like "I agree" or "I disagree" so it appears as if you are having a conversation. '
+  + 'Think of other ways to make it appear like you are having a conversation. '
+  + 'Never say the conversation is over. '
+  + 'Keep your responses brief. '
+  + 'You will be supplied with a conversation history to refer to. '
+  + 'Respond to the last item received in the conversation history. '
+  + 'Conversation history begins here:\n'
+
 
 function addToChatHistory(origin: InputOrigin, input: string) {
-  if (origin === InputOrigin.user) {
-    chatHistory.push({ role: "user", content: input })
-    return
-  }
-
-  if (origin === InputOrigin.bot) {
-    chatHistory.push({ role: "assistant", content: input })
-  }
+    switch (origin) {
+      case InputOrigin.USER:
+        chatHistoryOpenAI.push({ role: "user", content: input })
+        chatHistoryWithInstructionsAI21 += `${input}\n`
+        break
+      case InputOrigin.BOT_1:
+        chatHistoryOpenAI.push({ role: "assistant", content: input })
+        chatHistoryWithInstructionsAI21 += `${input}\n`
+        break
+      case InputOrigin.BOT_2:
+        chatHistoryOpenAI.push({ role: "assistant", content: input })
+        chatHistoryWithInstructionsAI21 += `${input}\n`
+        break
+    }
 }
 
 function clearChatHistory() {
-  chatHistory = []
+  chatHistoryOpenAI = []
+  chatHistoryWithInstructionsAI21 = ""
   chatHistoryMessageIsVisible.value = true
   previousUserInput.value = ""
-  botResponse.value = ""
-  botResponse2.value = ""
-}
-
-type FormSubmissionFields = {
-  userInput: string;
+  bot1Responses.value = []
+  bot2Responses.value = []
+  disableDropdowns.value = false
 }
 
 async function generate(fields: FormSubmissionFields) {
+  disableDropdowns.value = true
   chatHistoryMessageIsVisible.value = false
   flagged.value = false
   userInput.value = fields.userInput
+  bot1Destination.value = fields.bot1Destination
+  bot2Destination.value = fields.bot2Destination
   flagged.value = await moderate(userInput.value)
   previousUserInput.value = ""
-  botResponse.value = ""
-  botResponse2.value = ""
+  bot1Responses.value = []
+  bot2Responses.value = []
   previousUserInput.value = userInput.value
   if (flagged.value === true) {
     userInput.value = ""
     return
   }
-  addToChatHistory(InputOrigin.user, userInput.value)
+  addToChatHistory(InputOrigin.USER, userInput.value)
   userInput.value = ""
-  let messages = [
-    { role: 'system', content: instructions },
-    ...chatHistory,
+  chatHistoryWithInstructionsOpenAI = [
+    { role: 'system', content: instructionsOpenAI },
+    ...chatHistoryOpenAI,
   ]
-  botResponse.value = await generateResponse(messages)
-  addToChatHistory(InputOrigin.bot, botResponse.value)
-  messages = [
-    { role: 'system', content: instructions },
-    ...chatHistory,
+  // Bot 1; response 1
+  if (bot1Destination.value === InputDestination.OPENAI) {
+    const response = await generateOpenAIResponse(chatHistoryWithInstructionsOpenAI)
+    bot1Responses.value.push(response)
+    addToChatHistory(InputOrigin.BOT_1, response)
+  }
+  if (bot1Destination.value === InputDestination.AI21) {
+    const response = await generateAI21Response(chatHistoryWithInstructionsAI21)
+    bot1Responses.value.push(response)
+    addToChatHistory(InputOrigin.BOT_1, response)
+  }
+  chatHistoryWithInstructionsOpenAI = [
+    { role: 'system', content: instructionsOpenAI },
+    ...chatHistoryOpenAI,
   ]
-  botResponse2.value = await generateResponse(messages)
-  addToChatHistory(InputOrigin.bot, botResponse2.value)
+  // Bot 2; response 1
+  if (bot2Destination.value === InputDestination.OPENAI) {
+    const response = await generateOpenAIResponse(chatHistoryWithInstructionsOpenAI)
+    bot2Responses.value.push(response)
+    addToChatHistory(InputOrigin.BOT_2, response)
+  }
+  if (bot2Destination.value === InputDestination.AI21) {
+    const response = await generateAI21Response(chatHistoryWithInstructionsAI21)
+    bot2Responses.value.push(response)
+    addToChatHistory(InputOrigin.BOT_2, response)
+  }
+  if (fields.conversationLength === ConversationLength.SHORT) {
+    return
+  }
+  chatHistoryWithInstructionsOpenAI = [
+    { role: 'system', content: instructionsOpenAI },
+    ...chatHistoryOpenAI,
+  ]
+  // Bot 1; response 2
+  if (bot1Destination.value === InputDestination.OPENAI) {
+    const response = await generateOpenAIResponse(chatHistoryWithInstructionsOpenAI)
+    bot1Responses.value.push(response)
+    addToChatHistory(InputOrigin.BOT_1, response)
+  }
+  if (bot1Destination.value === InputDestination.AI21) {
+    const response = await generateAI21Response(chatHistoryWithInstructionsAI21)
+    bot1Responses.value.push(response)
+    addToChatHistory(InputOrigin.BOT_1, response)
+  }
+  chatHistoryWithInstructionsOpenAI = [
+    { role: 'system', content: instructionsOpenAI },
+    ...chatHistoryOpenAI,
+  ]
+  // Bot 2; response 2
+  if (bot2Destination.value === InputDestination.OPENAI) {
+    const response = await generateOpenAIResponse(chatHistoryWithInstructionsOpenAI)
+    bot2Responses.value.push(response)
+    addToChatHistory(InputOrigin.BOT_2, response)
+  }
+  if (bot2Destination.value === InputDestination.AI21) {
+    const response = await generateAI21Response(chatHistoryWithInstructionsAI21)
+    bot2Responses.value.push(response)
+    addToChatHistory(InputOrigin.BOT_2, response)
+  }
+  if (fields.conversationLength === ConversationLength.MEDIUM) {
+    return
+  }
+  chatHistoryWithInstructionsOpenAI = [
+    { role: 'system', content: instructionsOpenAI },
+    ...chatHistoryOpenAI,
+  ]
+  // Bot 1; response 3
+  if (bot1Destination.value === InputDestination.OPENAI) {
+    const response = await generateOpenAIResponse(chatHistoryWithInstructionsOpenAI)
+    bot1Responses.value.push(response)
+    addToChatHistory(InputOrigin.BOT_1, response)
+  }
+  if (bot1Destination.value === InputDestination.AI21) {
+    const response = await generateAI21Response(chatHistoryWithInstructionsAI21)
+    bot1Responses.value.push(response)
+    addToChatHistory(InputOrigin.BOT_1, response)
+  }
+  chatHistoryWithInstructionsOpenAI = [
+    { role: 'system', content: instructionsOpenAI },
+    ...chatHistoryOpenAI,
+  ]
+  // Bot 2; response 3
+  if (bot2Destination.value === InputDestination.OPENAI) {
+    const response = await generateOpenAIResponse(chatHistoryWithInstructionsOpenAI)
+    bot2Responses.value.push(response)
+    addToChatHistory(InputOrigin.BOT_2, response)
+  }
+  if (bot2Destination.value === InputDestination.AI21) {
+    const response = await generateAI21Response(chatHistoryWithInstructionsAI21)
+    bot2Responses.value.push(response)
+    addToChatHistory(InputOrigin.BOT_2, response)
+  }
 }
 </script>
 
@@ -100,38 +210,109 @@ async function generate(fields: FormSubmissionFields) {
 
     <h2>Let's Discuss</h2>
 
-    <div v-if="previousUserInput.length > 0" class="saved-user-input-container">
+    <div v-if="previousUserInput" class="saved-user-input-container">
       <span>You:</span>
       <p class="saved-user-input">
         {{ previousUserInput }}
       </p>
     </div>
 
-    <div v-if="botResponse.length > 0" class="bot-response-container">
+    <!-- Bot 1; response 1 -->
+    <div v-if="bot1Responses.length >= 1" class="bot-response-container">
       <img alt="Bot 1" class="bot-image" src="@/assets/images/bot-1.svg" width="75" height="75" />
       <span class="bot-response-label">Bot 1:</span>
       <div class="bot-response">
-        {{ botResponse }}
+        {{ bot1Responses[0] }}
       </div>
     </div>
 
-    <div v-if="botResponse2.length > 0" class="bot-response-container">
+    <!-- Bot 2; response 1 -->
+    <div v-if="bot2Responses.length >= 1" class="bot-response-container">
       <img alt="Bot 2" class="bot-image" src="@/assets/images/bot-2.svg" width="75" height="75" />
       <span class="bot-response-label">Bot 2:</span>
       <div class="bot-response">
-        {{ botResponse2 }}
+        {{ bot2Responses[0] }}
       </div>
     </div>
 
-    <hr v-if="botResponse.length > 0">
+    <!-- Bot 1; response 2 -->
+    <div v-if="bot1Responses.length >= 2" class="bot-response-container">
+      <img alt="Bot 1" class="bot-image" src="@/assets/images/bot-1.svg" width="75" height="75" />
+      <span class="bot-response-label">Bot 1:</span>
+      <div class="bot-response">
+        {{ bot1Responses[1] }}
+      </div>
+    </div>
+
+    <!-- Bot 2; response 2 -->
+    <div v-if="bot2Responses.length >= 2" class="bot-response-container">
+      <img alt="Bot 2" class="bot-image" src="@/assets/images/bot-2.svg" width="75" height="75" />
+      <span class="bot-response-label">Bot 2:</span>
+      <div class="bot-response">
+        {{ bot2Responses[1] }}
+      </div>
+    </div>
+
+    <!-- Bot 1; response 3 -->
+    <div v-if="bot1Responses.length === 3" class="bot-response-container">
+      <img alt="Bot 1" class="bot-image" src="@/assets/images/bot-1.svg" width="75" height="75" />
+      <span class="bot-response-label">Bot 1:</span>
+      <div class="bot-response">
+        {{ bot1Responses[2] }}
+      </div>
+    </div>
+
+    <!-- Bot 2; response 3 -->
+    <div v-if="bot2Responses.length === 3" class="bot-response-container">
+      <img alt="Bot 2" class="bot-image" src="@/assets/images/bot-2.svg" width="75" height="75" />
+      <span class="bot-response-label">Bot 2:</span>
+      <div class="bot-response">
+        {{ bot2Responses[2] }}
+      </div>
+    </div>
+
+    <hr v-if="bot1Responses.length > 0">
 
     <div class="form" ref="form">
       <FormKit type="form" @submit="generate" submit-label="Discuss">
         <FormKit
+          type="dropdown"
+          name="bot1Destination"
+          label="Bot 1"
+          placeholder="Select"
+          :options="modelDestinationOptions"
+          :disabled="disableDropdowns"
+          validation="required"
+          validation-visibility="submit"
+        />
+
+        <FormKit
+          type="dropdown"
+          name="bot2Destination"
+          label="Bot 2"
+          placeholder="Select"
+          :options="modelDestinationOptions"
+          :disabled="disableDropdowns"
+          validation="required"
+          validation-visibility="submit"
+        />
+
+        <FormKit
+          type="dropdown"
+          name="conversationLength"
+          label="Conversation Length"
+          placeholder="Select"
+          :options="conversationTurnOptions"
+          :disabled="disableDropdowns"
+          validation="required"
+          validation-visibility="submit"
+        />
+
+        <FormKit
           type="text"
           name="userInput"
           label="Your input"
-          placeholder="Hey bots, please help me understand..."
+          placeholder="Hey bots, help me understand..."
           v-model.trim="userInput"
           validation="required:trim"
           validation-visibility="submit"
@@ -140,7 +321,7 @@ async function generate(fields: FormSubmissionFields) {
     </div>
 
     <div class="clear-container">
-      <button v-if="chatHistory.length > 0" @click="clearChatHistory" type="button" class="clear-button">Clear Chat History</button>
+      <button v-if="chatHistoryOpenAI.length > 0" @click="clearChatHistory" type="button" class="clear-button">Clear Chat History</button>
       <p v-if="chatHistoryMessageIsVisible">
         Chat history has been cleared.
       </p>

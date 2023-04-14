@@ -35,9 +35,12 @@ npm install
 - Create a file at the root of the project named `.env`
 - Add the following to the `.env` file
 - Locally, `VITE_SERVER_LOCATION` will be `http://localhost:3000`
+- If on the B2B team, the `VITE_FORMKIT_PRO_API_KEY` for between2bots.com is `fk-593a60d8ca`
+- To get FormKit Pro perks for your own website, visit [https://formkit.com/pro](https://formkit.com/pro) for an API Key
 
 ```bash
 VITE_SERVER_LOCATION=http://localhost:3000
+VITE_FORMKIT_PRO_API_KEY=
 ```
 
 ### Compile and Hot-Reload for Development

@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import { RouterView } from "vue-router"
 import TheHeader from "@/components/layout/TheHeader.vue"
+import TheFooter from "@/components/layout/TheFooter.vue"
 </script>
 
 <template>
-  <div>
+  <div class="app-grid">
     <TheHeader />
     <RouterView />
+    <TheFooter />
   </div>
 </template>
 
 <style scoped lang="scss">
-div {
-  padding-bottom: 0.5rem;
+.app-grid {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100vh;
 }
 </style>

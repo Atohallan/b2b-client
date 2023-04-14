@@ -2,12 +2,24 @@
   background: #1c1e2d;
   color: #d2cbcb;
 
-  ::placeholder {
-    color: #545050;
+  ::placeholder,
+  .formkit-placeholder {
+    color: #545050 !important;
   }
 
-  input {
+  input,
+  .formkit-selector {
     background-color: #b9b5b5 !important;
+  }
+
+  .formkit-listitem {
+    color: #1c1e2d;
+    background-color: #b9b5b5;
+  }
+
+  .formkit-listitem[aria-selected=true],
+  .formkit-listitem[data-is-active=true] {
+    background-color: #8f8888 !important;
   }
 
   hr {
