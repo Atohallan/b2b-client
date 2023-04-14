@@ -10,6 +10,12 @@ button {
 button.formkit-input {
   background-color: #ff3131 !important;
   color: #1c1e2d !important;
+  transition: 0.5s !important;
+  margin: 0 !important;
+
+  &:hover {
+    background-color: #ff914d !important;
+  }
 }
 
 .formkit-actions .formkit-wrapper {
@@ -20,9 +26,21 @@ button.formkit-input {
 .formkit-listitem[data-is-active=true] {
   background-color: #ff3131;
   color: #1c1e2d;
+  cursor: pointer;
 }
 
 .formkit-selected-icon {
   color: #1c1e2d !important;
 }
 
+.formkit-form * {
+  font-size: 1.15rem !important;
+}
+
+.formkit-label {
+  cursor: pointer;
+}
+
+.formkit-message {
+  color: #ff3131;
+}

@@ -29,51 +29,51 @@ const modelDestinationOptions = [
 ]
 
 const conversationTurnOptions = [
-  { label: 'Short: 2 bot responses per turn', value: ConversationLength.SHORT },
-  { label: 'Medium: 4 bot responses per turn', value: ConversationLength.MEDIUM },
-  { label: 'Long: 6 bot responses per turn', value: ConversationLength.LONG },
+  { label: 'S: 2 bot responses per turn', value: ConversationLength.SHORT },
+  { label: 'M: 4 bot responses per turn', value: ConversationLength.MEDIUM },
+  { label: 'L: 6 bot responses per turn', value: ConversationLength.LONG },
 ]
 
 let chatHistoryOpenAI: MessageObjectOpenAI[] = []
 let chatHistoryWithInstructionsOpenAI: MessageObjectOpenAI[] = []
-let chatHistoryWithInstructionsAI21 = ""
 
-const instructions = `
-You are a friendly, helpful assistant.
-Respond to another language model, a chat bot like you, discussing what the user has requested.
-Only one reply per response.
-Do not create multiple replies in a response.
-Expand upon things the other chat bot says to help the user with their question.
-Disagree, agree, and/or add alternatives if you wish.
-Say things like "I agree" or "I disagree" so it appears as if you are having a conversation.
-Although, don't say "I agree" every time you respond. Try not to be repetitive with its usage.
-Do not pretend to be the user.
-Do not precede or label your responses with "You:" or "Bot 1:" or "Bot 2:" or "Me:" or anything like that.\n
-`
+const instructionsOpenAI = 'You are a friendly, helpful assistant. '
+  + 'You are having a conversation with another chat bot, discussing what the user has requested. '
+  + 'There are only two bots in the conversation. '
+  + 'Never identify yourself as "User:" in your response. '
+  + 'You will expand upon things the other chat bot says to help the user with their question. '
+  + 'You can disagree, agree, and/or add alternatives if you wish. '
+  + 'Say things like "I agree" or "I disagree" so it appears as if you are having a conversation. '
+  + 'Think of other ways to make it appear like you are having a conversation.'
 
-chatHistoryWithInstructionsAI21 += instructions
+let chatHistoryWithInstructionsAI21 = 'You are a friendly, helpful assistant. '
+  + 'You are having a conversation with another chat bot, discussing what the user has requested. '
+  + 'There are only two bots in the conversation. '
+  + 'Never identify yourself as "User:" in your response. '
+  + 'You will expand upon things the other chat bot says to help the user with their question. '
+  + 'You can disagree, agree, and/or add alternatives if you wish. '
+  + 'Say things like "I agree" or "I disagree" so it appears as if you are having a conversation. '
+  + 'Think of other ways to make it appear like you are having a conversation. '
+  + 'Never say the conversation is over. '
+  + 'Keep your responses brief. '
+  + 'You will be supplied with a conversation history to refer to. '
+  + 'Respond to the last item received in the conversation history. '
+  + 'Conversation history begins here:\n'
 
-const additionalA121Instructions = `
-You will be supplied with a conversation history to refer to.
-Respond to the last item received in the conversation history.
-Conversation history begins here:\n
-`
-
-chatHistoryWithInstructionsAI21 += additionalA121Instructions
 
 function addToChatHistory(origin: InputOrigin, input: string) {
     switch (origin) {
       case InputOrigin.USER:
         chatHistoryOpenAI.push({ role: "user", content: input })
-        chatHistoryWithInstructionsAI21 += `User: ${input}\n`
+        chatHistoryWithInstructionsAI21 += `${input}\n`
         break
       case InputOrigin.BOT_1:
-        chatHistoryOpenAI.push({ role: "assistant", content: `Bot 1: ${input}` })
-        chatHistoryWithInstructionsAI21 += `Bot 1: ${input}\n`
+        chatHistoryOpenAI.push({ role: "assistant", content: input })
+        chatHistoryWithInstructionsAI21 += `${input}\n`
         break
       case InputOrigin.BOT_2:
-        chatHistoryOpenAI.push({ role: "assistant", content: `Bot 2: ${input}` })
-        chatHistoryWithInstructionsAI21 += `Bot 2: ${input}\n`
+        chatHistoryOpenAI.push({ role: "assistant", content: input })
+        chatHistoryWithInstructionsAI21 += `${input}\n`
         break
     }
 }
@@ -107,7 +107,7 @@ async function generate(fields: FormSubmissionFields) {
   addToChatHistory(InputOrigin.USER, userInput.value)
   userInput.value = ""
   chatHistoryWithInstructionsOpenAI = [
-    { role: 'system', content: instructions },
+    { role: 'system', content: instructionsOpenAI },
     ...chatHistoryOpenAI,
   ]
   // Bot 1; response 1
@@ -122,7 +122,7 @@ async function generate(fields: FormSubmissionFields) {
     addToChatHistory(InputOrigin.BOT_1, response)
   }
   chatHistoryWithInstructionsOpenAI = [
-    { role: 'system', content: instructions },
+    { role: 'system', content: instructionsOpenAI },
     ...chatHistoryOpenAI,
   ]
   // Bot 2; response 1
@@ -140,7 +140,7 @@ async function generate(fields: FormSubmissionFields) {
     return
   }
   chatHistoryWithInstructionsOpenAI = [
-    { role: 'system', content: instructions },
+    { role: 'system', content: instructionsOpenAI },
     ...chatHistoryOpenAI,
   ]
   // Bot 1; response 2
@@ -155,7 +155,7 @@ async function generate(fields: FormSubmissionFields) {
     addToChatHistory(InputOrigin.BOT_1, response)
   }
   chatHistoryWithInstructionsOpenAI = [
-    { role: 'system', content: instructions },
+    { role: 'system', content: instructionsOpenAI },
     ...chatHistoryOpenAI,
   ]
   // Bot 2; response 2
@@ -173,7 +173,7 @@ async function generate(fields: FormSubmissionFields) {
     return
   }
   chatHistoryWithInstructionsOpenAI = [
-    { role: 'system', content: instructions },
+    { role: 'system', content: instructionsOpenAI },
     ...chatHistoryOpenAI,
   ]
   // Bot 1; response 3
@@ -188,7 +188,7 @@ async function generate(fields: FormSubmissionFields) {
     addToChatHistory(InputOrigin.BOT_1, response)
   }
   chatHistoryWithInstructionsOpenAI = [
-    { role: 'system', content: instructions },
+    { role: 'system', content: instructionsOpenAI },
     ...chatHistoryOpenAI,
   ]
   // Bot 2; response 3
@@ -312,7 +312,7 @@ async function generate(fields: FormSubmissionFields) {
           type="text"
           name="userInput"
           label="Your input"
-          placeholder="Hey bots, please help me understand..."
+          placeholder="Hey bots, help me understand..."
           v-model.trim="userInput"
           validation="required:trim"
           validation-visibility="submit"
