@@ -5,8 +5,8 @@ import { generateAI21Response } from "@/api/ai21";
 import autoAnimate from "@formkit/auto-animate";
 import { InputDestination, InputOrigin } from "@/enums/input";
 import { ConversationLength } from "@/enums/form";
-import { FormSubmissionFields } from "@/types/form";
-import { MessageObjectOpenAI } from "@/types/message";
+import type { FormSubmissionFields } from "@/types/form";
+import type { MessageObjectOpenAI } from "@/types/message";
 
 const form = ref()
 onMounted(() => {
